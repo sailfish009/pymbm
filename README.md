@@ -1,0 +1,2 @@
+# pymbm
+Minimal bookmark manager
