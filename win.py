@@ -8,14 +8,25 @@ import webbrowser
 import dearpygui.dearpygui as dpg
 import pandas as pd
 import pyperclip
-import validators
+import re
+import requests
+from urllib.parse import urlparse
 
 WINDOW_TAG1 = "Main Window"
 TABLE_TAG1 = "Main Table"
 INPUT_TAG1 = "Input Text"
+INPUT_TAG2 = "Input Note"
 FILENAME = "data.csv"
 DF = None
 SELECTED_LIST = []
+HEADERS = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
+
+def validators(x):
+    try:
+        result = urlparse(x)
+        return all([result.scheme, result.netloc])
+    except:
+        return False
 
 def update_table():
     global WINDOW_TAG1, TABLE_TAG1, DF
@@ -33,22 +44,23 @@ def update_table():
                 with dpg.table_row(filter_key=f"{arr[i,1]}"):
                     for j in range(DF.shape[1]):
                         if j == 0:
-                            dpg.add_checkbox(callback=row_select, user_data=[i, f"{arr[i,1]}"])
+                            dpg.add_checkbox(callback=row_select, user_data=[i, f"{arr[i,1]}", f"{arr[i,2]}"])
                         else:
                             dpg.add_input_text(default_value=f"{arr[i,j]}", width=2000)
 
 def data_open():
-    global INPUT_TAG1
+    global INPUT_TAG1, INPUT_TAG2, HEADERS
     url = dpg.get_value(INPUT_TAG1)
-    if validators.url(url):
+    if validators(url):
         webbrowser.open(url)
 
 def data_add():
     global INPUT_TAG1, DF
     url = dpg.get_value(INPUT_TAG1)
-    if validators.url(url):
+    note = dpg.get_value(INPUT_TAG2)
+    if validators(url):
         d = dict()
-        d['ID'], d['URL'], d['NOTE'] = datetime.datetime.now(), url, ''
+        d['ID'], d['URL'], d['NOTE'] = datetime.datetime.now(), url, note
         df = pd.DataFrame([d])
         if DF is None:
             DF = df.copy()
@@ -62,7 +74,6 @@ def data_remove():
     global SELECTED_LIST, DF
     if len(SELECTED_LIST) > 0:
         SELECTED_LIST = [*{*SELECTED_LIST}] 
-        print(f'list: {SELECTED_LIST}')
         DF = DF[~DF['URL'].isin(SELECTED_LIST)].copy()
         DF.sort_values(by='ID', ascending=True, inplace=True)
         update_table()
@@ -74,6 +85,10 @@ def data_paste():
     global INPUT_TAG1
     url = pyperclip.paste()
     dpg.set_value(INPUT_TAG1, url)
+    if validators(url):
+        r = requests.get(url, headers=HEADERS) 
+        d = re.search('<\W*title\W*(.*)</title', r.text, re.IGNORECASE)
+        dpg.set_value(INPUT_TAG2, d.group(1))
 
 def data_save():
     global DF, FILENAME 
@@ -81,25 +96,22 @@ def data_save():
     DF.to_csv(FILENAME, encoding='utf-8-sig')
 
 def row_select(sender, app_data, user_data):
-    print(f'app_data : {app_data}')
-    global INPUT_TAG1, SELECTED_LIST
-    print(f'select url: {user_data}')
+    global INPUT_TAG1, INPUT_TAG2, SELECTED_LIST
     dpg.set_value(INPUT_TAG1, user_data[1])
+    dpg.set_value(INPUT_TAG2, user_data[2])
     if app_data:
         SELECTED_LIST.append(user_data[1])
     else:
         SELECTED_LIST.remove(user_data[1])
 
 def create_main_window(dpg, TAG, SIDE_WIDTH, WIDTH, HEIGHT):
-    global TABLE_TAG1, INPUT_TAG1, DF, FILENAME
+    global TABLE_TAG1, INPUT_TAG2, HEADERS, DF, FILENAME
     with dpg.window(tag=TAG, pos=[SIDE_WIDTH,0], width=WIDTH-SIDE_WIDTH, no_title_bar=True, height=HEIGHT, no_resize=True, no_move=True, no_close=True):
         url = pyperclip.paste()
-        print(f'copied url: {url}')
-        if validators.url(url) == False:
-            pyperclip.copy('')
         with dpg.group(horizontal=True):
             dpg.add_text("URL")
-            dpg.add_input_text(width=900, default_value=url, tag=INPUT_TAG1)
+            dpg.add_input_text(width=700, tag=INPUT_TAG1)
+            dpg.add_input_text(width=200, tag=INPUT_TAG2)
             dpg.add_button(label='PASTE', callback=data_paste)
             dpg.add_button(label='OPEN', callback=data_open)
             dpg.add_button(label='ADD', callback=data_add)
@@ -107,6 +119,14 @@ def create_main_window(dpg, TAG, SIDE_WIDTH, WIDTH, HEIGHT):
             dpg.add_button(label='SAVE', callback=data_save)
             dpg.add_text("FILTER")
             dpg.add_input_text(user_data=TABLE_TAG1, callback=lambda s, a, u: dpg.set_value(u, dpg.get_value(s)))
+
+        if validators(url) == False:
+            pyperclip.copy('')
+        else:
+            r = requests.get(url, headers=HEADERS) 
+            d = re.search('<\W*title\W*(.*)</title', r.text, re.IGNORECASE)
+            dpg.set_value(INPUT_TAG1, url)
+            dpg.set_value(INPUT_TAG2, d.group(1))
 
         with dpg.table(tag=TABLE_TAG1, label='DataFrame', header_row=False, resizable=False, scrollY=True):
             if os.path.exists(FILENAME):
@@ -128,7 +148,6 @@ def create_main_window(dpg, TAG, SIDE_WIDTH, WIDTH, HEIGHT):
                     with dpg.table_row(filter_key=f"{arr[i,1]}"):
                         for j in range(DF.shape[1]):
                             if j == 0:
-                                dpg.add_checkbox(callback=row_select, user_data=[i, f"{arr[i,1]}"])
+                                dpg.add_checkbox(callback=row_select, user_data=[i, f"{arr[i,1]}", f"{arr[i,2]}"])
                             else:
                                 dpg.add_input_text(default_value=f"{arr[i,j]}", width=2000)
-
