@@ -5,8 +5,8 @@ pymbm : minimal bookmark manager
 import sys
 import dearpygui.dearpygui as dpg
 import pandas as pd
-from side import create_side_window
-from win import create_main_window, data_save
+from side import create_side_window, set_side_category, category_add
+from win import create_main_window, get_category, data_save
 
 PROGRAM_W = 1920
 PROGRAM_H = 1080
@@ -24,6 +24,9 @@ dpg.create_context()
 
 create_side_window(dpg, WINDOW_TAG2, SIDE_PANEL_W, PROGRAM_W, PROGRAM_H)
 create_main_window(dpg, WINDOW_TAG1, SIDE_PANEL_W, PROGRAM_W, PROGRAM_H)
+category = get_category()
+set_side_category(category)
+category_add()
 
 ##########################################################################################################
 
