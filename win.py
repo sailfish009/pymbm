@@ -30,7 +30,6 @@ def validators(x):
 
 def update_table():
     global WINDOW_TAG1, TABLE_TAG1, DF
-    DF = DF[['ID','URL','NOTE']].copy()
     dpg.delete_item(TABLE_TAG1, children_only=False)
     with dpg.table(parent=WINDOW_TAG1, tag=TABLE_TAG1, label='DataFrame', header_row=False, resizable=False, scrollY=True):
         if DF is not None:
@@ -38,6 +37,8 @@ def update_table():
             for i in range(DF.shape[1]):
                 if i == 0:
                     dpg.add_table_column(label=DF.columns[i], width_stretch=True, init_width_or_weight=0.02)
+                elif i == 1:
+                    dpg.add_table_column(label=DF.columns[i], width_stretch=True, init_width_or_weight=0.72)
                 else:
                     dpg.add_table_column(label=DF.columns[i])
             for i in range(DF.shape[0]):
@@ -57,8 +58,8 @@ def data_open():
 def data_add():
     global INPUT_TAG1, DF
     url = dpg.get_value(INPUT_TAG1)
-    note = dpg.get_value(INPUT_TAG2)
     if validators(url):
+        note = dpg.get_value(INPUT_TAG2)
         d = dict()
         d['ID'], d['URL'], d['NOTE'] = datetime.datetime.now(), url, note
         df = pd.DataFrame([d])
@@ -66,8 +67,9 @@ def data_add():
             DF = df.copy()
         else:
             if DF[DF['URL'].str.contains(url)].shape[0] == 0:
-                DF = DF[['ID','URL','NOTE']].copy()
                 DF = pd.concat([DF,df])
+            else:
+                DF[DF['URL'].str.contains(url)]['NOTE'] = note
         update_table()
 
 def data_remove():
@@ -80,6 +82,7 @@ def data_remove():
         SELECTED_LIST = []
         pyperclip.copy('')
         dpg.set_value(INPUT_TAG1, '')
+        dpg.set_value(INPUT_TAG2, '')
 
 def data_paste():
     global INPUT_TAG1
@@ -88,7 +91,8 @@ def data_paste():
     if validators(url):
         r = requests.get(url, headers=HEADERS) 
         d = re.search('<\W*title\W*(.*)</title', r.text, re.IGNORECASE)
-        dpg.set_value(INPUT_TAG2, d.group(1))
+        if d is not None:
+            dpg.set_value(INPUT_TAG2, d.group(1))
 
 def data_save():
     global DF, FILENAME 
@@ -123,10 +127,11 @@ def create_main_window(dpg, TAG, SIDE_WIDTH, WIDTH, HEIGHT):
         if validators(url) == False:
             pyperclip.copy('')
         else:
+            dpg.set_value(INPUT_TAG1, url)
             r = requests.get(url, headers=HEADERS) 
             d = re.search('<\W*title\W*(.*)</title', r.text, re.IGNORECASE)
-            dpg.set_value(INPUT_TAG1, url)
-            dpg.set_value(INPUT_TAG2, d.group(1))
+            if d is not None:
+                dpg.set_value(INPUT_TAG2, d.group(1))
 
         with dpg.table(tag=TABLE_TAG1, label='DataFrame', header_row=False, resizable=False, scrollY=True):
             if os.path.exists(FILENAME):
@@ -142,6 +147,8 @@ def create_main_window(dpg, TAG, SIDE_WIDTH, WIDTH, HEIGHT):
                 for i in range(DF.shape[1]):
                     if i == 0:
                         dpg.add_table_column(label=DF.columns[i], width_stretch=True, init_width_or_weight=0.02)
+                    elif i == 1:
+                        dpg.add_table_column(label=DF.columns[i], width_stretch=True, init_width_or_weight=0.72)
                     else:
                         dpg.add_table_column(label=DF.columns[i])
                 for i in range(DF.shape[0]):
