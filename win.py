@@ -18,8 +18,22 @@ INPUT_TAG1 = "Input Text"
 INPUT_TAG2 = "Input Note"
 FILENAME = "data.csv"
 DF = None
+CURRENT_DF = None
 SELECTED_LIST = []
 HEADERS = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
+CATEGORY = 'DEFAULT'
+
+def set_category(category):
+    global CATEGORY, DF
+    CATEGORY = category
+    CURRENT_DF = DF[DF['CATEGORY']==category].copy()
+    if CURRENT_DF is None or len(CURRENT_DF) == 0:
+        CURRENT_DF = None
+    update_table(CURRENT_DF)
+
+def get_category():
+    global CATEGORY
+    return CATEGORY
 
 def validators(x):
     try:
@@ -28,13 +42,13 @@ def validators(x):
     except:
         return False
 
-def update_table():
-    global WINDOW_TAG1, TABLE_TAG1, DF
+def update_table(DF):
+    global WINDOW_TAG1, TABLE_TAG1
     dpg.delete_item(TABLE_TAG1, children_only=False)
     with dpg.table(parent=WINDOW_TAG1, tag=TABLE_TAG1, label='DataFrame', header_row=False, resizable=False, scrollY=True):
         if DF is not None:
             arr = DF.to_numpy()   
-            for i in range(DF.shape[1]):
+            for i in range(DF.shape[1]-1):
                 if i == 0:
                     dpg.add_table_column(label=DF.columns[i], width_stretch=True, init_width_or_weight=0.02)
                 elif i == 1:
@@ -43,7 +57,7 @@ def update_table():
                     dpg.add_table_column(label=DF.columns[i])
             for i in range(DF.shape[0]):
                 with dpg.table_row(filter_key=f"{arr[i,1]}"):
-                    for j in range(DF.shape[1]):
+                    for j in range(DF.shape[1]-1):
                         if j == 0:
                             dpg.add_checkbox(callback=row_select, user_data=[i, f"{arr[i,1]}", f"{arr[i,2]}"])
                         else:
@@ -56,29 +70,30 @@ def data_open():
         webbrowser.open(url)
 
 def data_add():
-    global INPUT_TAG1, DF
+    global INPUT_TAG1, CATEGORY, CURRENT_DF
+    # CURRENT_DF = DF[DF['CATEGORY']==CATEGORY].copy()
     url = dpg.get_value(INPUT_TAG1)
     if validators(url):
         note = dpg.get_value(INPUT_TAG2)
         d = dict()
-        d['ID'], d['URL'], d['NOTE'] = datetime.datetime.now(), url, note
+        d['ID'], d['URL'], d['NOTE'], d['CATEGORY'] = datetime.datetime.now(), url, note, CATEGORY
         df = pd.DataFrame([d])
-        if DF is None:
-            DF = df.copy()
+        if CURRENT_DF is None:
+            CURRENT_DF = df.copy()
         else:
-            if DF[DF['URL'].str.contains(url)].shape[0] == 0:
-                DF = pd.concat([DF,df])
+            if CURRENT_DF[CURRENT_DF['URL'].str.contains(url)].shape[0] == 0:
+                CURRENT_DF = pd.concat([CURRENT_DF,df])
             else:
-                DF[DF['URL'].str.contains(url)]['NOTE'] = note
-        update_table()
+                CURRENT_DF[CURRENT_DF['URL'].str.contains(url)]['NOTE'] = note
+        update_table(CURRENT_DF)
 
 def data_remove():
-    global SELECTED_LIST, DF
+    global SELECTED_LIST, CURRENT_DF
     if len(SELECTED_LIST) > 0:
         SELECTED_LIST = [*{*SELECTED_LIST}] 
-        DF = DF[~DF['URL'].isin(SELECTED_LIST)].copy()
-        DF.sort_values(by='ID', ascending=True, inplace=True)
-        update_table()
+        CURRENT_DF = CURRENT_DF[~CURRENT_DF['URL'].isin(SELECTED_LIST)].copy()
+        CURRENT_DF.sort_values(by='ID', ascending=True, inplace=True)
+        update_table(CURRENT_DF)
         SELECTED_LIST = []
         pyperclip.copy('')
         dpg.set_value(INPUT_TAG1, '')
@@ -95,8 +110,10 @@ def data_paste():
             dpg.set_value(INPUT_TAG2, d.group(1))
 
 def data_save():
-    global DF, FILENAME 
-    DF = DF[['ID','URL','NOTE']].copy()
+    global DF, CURRENT_DF, FILENAME 
+    DF = pd.concat([DF, CURRENT_DF])
+    DF.drop_duplicates(subset=['ID','URL','NOTE','CATEGORY'], keep='last', inplace=True)
+    DF = DF[['ID','URL','NOTE','CATEGORY']].copy()
     DF.to_csv(FILENAME, encoding='utf-8-sig')
 
 def row_select(sender, app_data, user_data):
@@ -109,7 +126,7 @@ def row_select(sender, app_data, user_data):
         SELECTED_LIST.remove(user_data[1])
 
 def create_main_window(dpg, TAG, SIDE_WIDTH, WIDTH, HEIGHT):
-    global TABLE_TAG1, INPUT_TAG2, HEADERS, DF, FILENAME
+    global TABLE_TAG1, INPUT_TAG2, HEADERS, DF, CURRENT_DF, FILENAME, CATEGORY
     with dpg.window(tag=TAG, pos=[SIDE_WIDTH,0], width=WIDTH-SIDE_WIDTH, no_title_bar=True, height=HEIGHT, no_resize=True, no_move=True, no_close=True):
         url = pyperclip.paste()
         with dpg.group(horizontal=True):
@@ -137,23 +154,25 @@ def create_main_window(dpg, TAG, SIDE_WIDTH, WIDTH, HEIGHT):
             if os.path.exists(FILENAME):
                 DF = pd.read_csv(FILENAME, encoding='utf-8-sig')
                 if DF is None or len(DF) == 0:
-                    DF = None
+                    DF = CURRENT_DF = None
                 else:
                     DF = DF.fillna('')
-                    DF = DF[['ID','URL','NOTE']].copy()
+                    DF = DF[['ID','URL','NOTE','CATEGORY']].copy()
+                    CATEGORY = DF['CATEGORY'].values[0]
+                    CURRENT_DF = DF[DF['CATEGORY']==CATEGORY].copy()
 
-            if DF is not None:
-                arr = DF.to_numpy()   
-                for i in range(DF.shape[1]):
+            if CURRENT_DF is not None:
+                arr = CURRENT_DF.to_numpy()   
+                for i in range(CURRENT_DF.shape[1]-1):
                     if i == 0:
-                        dpg.add_table_column(label=DF.columns[i], width_stretch=True, init_width_or_weight=0.02)
+                        dpg.add_table_column(label=CURRENT_DF.columns[i], width_stretch=True, init_width_or_weight=0.02)
                     elif i == 1:
-                        dpg.add_table_column(label=DF.columns[i], width_stretch=True, init_width_or_weight=0.72)
+                        dpg.add_table_column(label=CURRENT_DF.columns[i], width_stretch=True, init_width_or_weight=0.72)
                     else:
-                        dpg.add_table_column(label=DF.columns[i])
-                for i in range(DF.shape[0]):
+                        dpg.add_table_column(label=CURRENT_DF.columns[i])
+                for i in range(CURRENT_DF.shape[0]):
                     with dpg.table_row(filter_key=f"{arr[i,1]}"):
-                        for j in range(DF.shape[1]):
+                        for j in range(CURRENT_DF.shape[1]-1):
                             if j == 0:
                                 dpg.add_checkbox(callback=row_select, user_data=[i, f"{arr[i,1]}", f"{arr[i,2]}"])
                             else:
