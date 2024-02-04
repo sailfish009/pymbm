@@ -6,7 +6,7 @@ import sys
 import dearpygui.dearpygui as dpg
 import pandas as pd
 from side import create_side_window, set_side_category, category_add
-from win import create_main_window, get_category, data_save
+from win import create_main_window, get_category
 
 PROGRAM_W = 1920
 PROGRAM_H = 1080
@@ -36,5 +36,3 @@ dpg.show_viewport()
 dpg.maximize_viewport()
 dpg.start_dearpygui()
 dpg.destroy_context()
-
-data_save()
