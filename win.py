@@ -93,6 +93,7 @@ def data_remove():
     if len(SELECTED_LIST) > 0:
         SELECTED_LIST = [*{*SELECTED_LIST}] 
         CURRENT_DF = CURRENT_DF[~CURRENT_DF['URL'].isin(SELECTED_LIST)].copy()
+        CURRENT_DF['ID'] = pd.to_datetime(CURRENT_DF['ID'])
         CURRENT_DF.sort_values(by='ID', ascending=True, inplace=True)
         update_table(CURRENT_DF)
         SELECTED_LIST = []
