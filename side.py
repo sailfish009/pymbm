@@ -21,7 +21,7 @@ def set_side_category(category):
     dpg.set_value(INPUT_TAG1, category)
 
 def row_select(sender, app_data, user_data):
-    global INPUT_TAG1
+    global INPUT_TAG1, SELECTED_LIST
     dpg.set_value(INPUT_TAG1, user_data[1])
     set_category(user_data[1])
     if app_data:
@@ -52,11 +52,6 @@ def update_table():
                             dpg.add_checkbox(callback=row_select, user_data=[i, f"{arr[i,1]}"])
                         else:
                             dpg.add_input_text(default_value=f"{arr[i,j]}", width=2000)
-
-def category_id():
-    if DF is None or len(DF) == 0:
-        return None
-    return dpg.get_value(INPUT_TAG1)
 
 def category_add():
     global INPUT_TAG1, DF
