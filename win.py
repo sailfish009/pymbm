@@ -25,6 +25,7 @@ CATEGORY = 'DEFAULT'
 
 def set_category(category):
     global CATEGORY, DF
+    data_save()
     CATEGORY = category
     CURRENT_DF = DF[DF['CATEGORY']==category].copy()
     if CURRENT_DF is None or len(CURRENT_DF) == 0:
@@ -70,8 +71,7 @@ def data_open():
         webbrowser.open(url)
 
 def data_add():
-    global INPUT_TAG1, CATEGORY, CURRENT_DF
-    # CURRENT_DF = DF[DF['CATEGORY']==CATEGORY].copy()
+    global INPUT_TAG1, CATEGORY, DF, CURRENT_DF
     url = dpg.get_value(INPUT_TAG1)
     if validators(url):
         note = dpg.get_value(INPUT_TAG2)
@@ -84,8 +84,9 @@ def data_add():
             if CURRENT_DF[CURRENT_DF['URL'].isin([url])].shape[0] == 0:
                 CURRENT_DF = pd.concat([CURRENT_DF,df])
             else:
-                CURRENT_DF[CURRENT_DF['URL'].isin([url])]['NOTE'] = note
+                DF.loc[DF['URL'].isin([url]), 'NOTE'] = CURRENT_DF.loc[CURRENT_DF['URL'].isin([url]), 'NOTE'] = note
         update_table(CURRENT_DF)
+        data_save()
 
 def data_remove():
     global SELECTED_LIST, CURRENT_DF
@@ -98,6 +99,7 @@ def data_remove():
         pyperclip.copy('')
         dpg.set_value(INPUT_TAG1, '')
         dpg.set_value(INPUT_TAG2, '')
+        data_save()
 
 def data_paste():
     global INPUT_TAG1
@@ -137,7 +139,6 @@ def create_main_window(dpg, TAG, SIDE_WIDTH, WIDTH, HEIGHT):
             dpg.add_button(label='OPEN', callback=data_open)
             dpg.add_button(label='ADD', callback=data_add)
             dpg.add_button(label='REMOVE', callback=data_remove)
-            dpg.add_button(label='SAVE', callback=data_save)
             dpg.add_text("FILTER")
             dpg.add_input_text(user_data=TABLE_TAG1, callback=lambda s, a, u: dpg.set_value(u, dpg.get_value(s)))
 
