@@ -1,5 +1,6 @@
 # pymbm
 Minimal bookmark manager
 
-![image](https://github.com/sailfish009/pymbm/assets/17582766/81725f7f-3ab2-49cb-af4f-b8e7c8655d45)
+![image](https://github.com/sailfish009/pymbm/assets/17582766/2414d523-607c-4af7-b9c9-7de990eaa91c)
+
 
