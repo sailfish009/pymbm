@@ -81,10 +81,10 @@ def data_add():
         if CURRENT_DF is None:
             CURRENT_DF = df.copy()
         else:
-            if CURRENT_DF[CURRENT_DF['URL'].str.contains(url)].shape[0] == 0:
+            if CURRENT_DF[CURRENT_DF['URL'].isin([url])].shape[0] == 0:
                 CURRENT_DF = pd.concat([CURRENT_DF,df])
             else:
-                CURRENT_DF[CURRENT_DF['URL'].str.contains(url)]['NOTE'] = note
+                CURRENT_DF[CURRENT_DF['URL'].isin([url])]['NOTE'] = note
         update_table(CURRENT_DF)
 
 def data_remove():
