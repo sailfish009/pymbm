@@ -89,9 +89,10 @@ def data_add():
         data_save()
 
 def data_remove():
-    global SELECTED_LIST, CURRENT_DF
+    global SELECTED_LIST, DF, CURRENT_DF, CATEGORY
     if len(SELECTED_LIST) > 0:
         SELECTED_LIST = [*{*SELECTED_LIST}] 
+        DF = DF[~( (DF['URL'].isin(SELECTED_LIST)) & (DF['CATEGORY'] == CATEGORY) )].copy()
         CURRENT_DF = CURRENT_DF[~CURRENT_DF['URL'].isin(SELECTED_LIST)].copy()
         CURRENT_DF['ID'] = pd.to_datetime(CURRENT_DF['ID'])
         CURRENT_DF.sort_values(by='ID', ascending=True, inplace=True)
@@ -115,7 +116,7 @@ def data_paste():
 def data_save():
     global DF, CURRENT_DF, FILENAME 
     DF = pd.concat([DF, CURRENT_DF])
-    DF.drop_duplicates(subset=['ID','URL','NOTE','CATEGORY'], keep='last', inplace=True)
+    DF.drop_duplicates(subset=['URL','NOTE','CATEGORY'], keep='last', inplace=True)
     DF = DF[['ID','URL','NOTE','CATEGORY']].copy()
     DF.to_csv(FILENAME, encoding='utf-8-sig')
 
