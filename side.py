@@ -67,16 +67,12 @@ def category_add():
     update_table()
     data_save()
 
-def category_remove():
-    print('')
-
 def create_side_window(dpg, TAG, SIDE_WIDTH, WIDTH, HEIGHT):
     with dpg.window(tag=TAG, pos=[0,0], width=SIDE_WIDTH, height=HEIGHT, no_title_bar=True, no_resize=True, no_move=True, no_close=True):
         global TABLE_TAG1, INPUT_TAG2, HEADERS, DF, FILENAME
         with dpg.group(horizontal=True):
-            dpg.add_input_text(width=90, tag=INPUT_TAG1)
+            dpg.add_input_text(width=130, tag=INPUT_TAG1)
             dpg.add_button(label='ADD', callback=category_add)
-            dpg.add_button(label='REMOVE', callback=category_remove)
 
         with dpg.group(horizontal=True):
             dpg.add_input_text(user_data=TABLE_TAG1, callback=lambda s, a, u: dpg.set_value(u, dpg.get_value(s)))
