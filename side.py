@@ -12,22 +12,23 @@ from win import set_category
 WINDOW_TAG1 = "Side Window"
 TABLE_TAG1 = "Side Table"
 INPUT_TAG1 = "Input Category"
+INPUT_TAG2 = "Check Box "
 FILENAME = "cat.csv"
 DF = None
-SELECTED_LIST = []
 
 def set_side_category(category):
     global INPUT_TAG1
     dpg.set_value(INPUT_TAG1, category)
 
 def row_select(sender, app_data, user_data):
-    global INPUT_TAG1, SELECTED_LIST
+    global INPUT_TAG1
     dpg.set_value(INPUT_TAG1, user_data[1])
     set_category(user_data[1])
-    if app_data:
-        SELECTED_LIST.append(user_data[1])
-    else:
-        SELECTED_LIST.remove(user_data[1])
+    for i in range(len(DF)):
+        if i == int(user_data[0]):
+            dpg.set_value(f'{INPUT_TAG2}{i}', True)
+        else:
+            dpg.set_value(f'{INPUT_TAG2}{i}', False)
 
 def data_save():
     global DF, FILENAME 
@@ -49,7 +50,7 @@ def update_table():
                 with dpg.table_row(filter_key=f"{arr[i,1]}"):
                     for j in range(DF.shape[1]):
                         if j == 0:
-                            dpg.add_checkbox(callback=row_select, user_data=[i, f"{arr[i,1]}"])
+                            dpg.add_checkbox(callback=row_select, user_data=[i, f"{arr[i,1]}"], tag=f'{INPUT_TAG2}{i}')
                         else:
                             dpg.add_input_text(default_value=f"{arr[i,j]}", width=2000)
 
@@ -98,6 +99,6 @@ def create_side_window(dpg, TAG, SIDE_WIDTH, WIDTH, HEIGHT):
                     with dpg.table_row(filter_key=f"{arr[i,1]}"):
                         for j in range(DF.shape[1]):
                             if j == 0:
-                                dpg.add_checkbox(callback=row_select, user_data=[i, f"{arr[i,1]}"])
+                                dpg.add_checkbox(callback=row_select, user_data=[i, f"{arr[i,1]}"], tag=f'{INPUT_TAG2}{i}')
                             else:
                                 dpg.add_input_text(default_value=f"{arr[i,j]}", width=2000)
