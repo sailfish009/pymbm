@@ -24,8 +24,9 @@ HEADERS = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleW
 CATEGORY = 'DEFAULT'
 
 def set_category(category):
-    global CATEGORY, DF
+    global CATEGORY, DF, SELECTED_LIST
     data_save()
+    SELECTED_LIST = []
     CATEGORY = category
     CURRENT_DF = DF[DF['CATEGORY']==category].copy()
     if CURRENT_DF is None or len(CURRENT_DF) == 0:
@@ -75,6 +76,9 @@ def data_add():
     url = dpg.get_value(INPUT_TAG1)
     if validators(url):
         note = dpg.get_value(INPUT_TAG2)
+        CURRENT_DF = DF[DF['CATEGORY']==CATEGORY].copy()
+        if CURRENT_DF is None or len(CURRENT_DF) == 0:
+            CURRENT_DF = None
         d = dict()
         d['ID'], d['URL'], d['NOTE'], d['CATEGORY'] = datetime.datetime.now(), url, note, CATEGORY
         df = pd.DataFrame([d])
@@ -118,6 +122,7 @@ def data_save():
     DF = pd.concat([DF, CURRENT_DF])
     DF.drop_duplicates(subset=['URL','NOTE','CATEGORY'], keep='last', inplace=True)
     DF = DF[['ID','URL','NOTE','CATEGORY']].copy()
+    DF.reset_index(drop=True, inplace=True)
     DF.to_csv(FILENAME, encoding='utf-8-sig')
 
 def row_select(sender, app_data, user_data):
