@@ -85,9 +85,21 @@ def data_open():
     """
     data_open: 
     """
-    global INPUT_TAG1, INPUT_TAG2, HEADERS # pylint: disable=W0602
+    global INPUT_TAG1 # pylint: disable=W0602
     url = dpg.get_value(INPUT_TAG1)
     if validators(url):
+        webbrowser.open(url)
+
+def data_open_all():
+    """
+    data_open_all: 
+    """
+    global INPUT_TAG1, SELECTED_LIST # pylint: disable=W0602
+    if len(SELECTED_LIST) > 1:
+        for url in SELECTED_LIST:
+            webbrowser.open(url)
+    elif len(SELECTED_LIST) == 1:
+        url = dpg.get_value(INPUT_TAG1)
         webbrowser.open(url)
 
 def data_add():
@@ -144,7 +156,6 @@ def data_paste():
         r = requests.get(url, headers=HEADERS, timeout=60)
         regex = re.compile('<title>(.*?)</title>', re.IGNORECASE|re.DOTALL)
         d = regex.search(r.text)
-        # d = re.search('<\W*title\W*(.*)</title', r.text, re.IGNORECASE)
         if d is not None:
             dpg.set_value(INPUT_TAG2, d.group(1))
 
@@ -185,6 +196,7 @@ def create_main_window(TAG, SIDE_WIDTH, WIDTH, HEIGHT): # pylint: disable=C0103,
             dpg.add_input_text(width=200, tag=INPUT_TAG2)
             dpg.add_button(label='PASTE', callback=data_paste)
             dpg.add_button(label='OPEN', callback=data_open)
+            dpg.add_button(label='ALL', callback=data_open_all)
             dpg.add_button(label='ADD', callback=data_add)
             dpg.add_button(label='REMOVE', callback=data_remove)
             dpg.add_text("FILTER")
@@ -198,7 +210,6 @@ def create_main_window(TAG, SIDE_WIDTH, WIDTH, HEIGHT): # pylint: disable=C0103,
             r = requests.get(url, headers=HEADERS, timeout=60)
             regex = re.compile('<title>(.*?)</title>', re.IGNORECASE|re.DOTALL)
             d = regex.search(r.text)
-            # d = re.search('<\W*title\W*(.*)</title', r.text, re.IGNORECASE)
             if d is not None:
                 dpg.set_value(INPUT_TAG2, d.group(1))
 
