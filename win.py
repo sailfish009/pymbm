@@ -95,12 +95,9 @@ def data_open_all():
     data_open_all: 
     """
     global INPUT_TAG1, SELECTED_LIST # pylint: disable=W0602
-    if len(SELECTED_LIST) > 1:
+    if len(SELECTED_LIST) >= 1:
         for url in SELECTED_LIST:
             webbrowser.open(url)
-    elif len(SELECTED_LIST) == 1:
-        url = dpg.get_value(INPUT_TAG1)
-        webbrowser.open(url)
 
 def data_add():
     """
