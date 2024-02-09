@@ -6,6 +6,7 @@ import sys
 import dearpygui.dearpygui as dpg
 from side import create_side_window, set_side_category, category_add
 from win import create_main_window, get_category
+from deep import create_deep_window
 
 PROGRAM_TITLE = 'Minimal bookmark manager'
 PROGRAM_W = 1920
@@ -13,6 +14,7 @@ PROGRAM_H = 1080
 SIDE_PANEL_W = 200
 WINDOW_TAG1 = "Main Window"
 WINDOW_TAG2 = "Side Window"
+WINDOW_TAG3 = "Deep Window"
 
 sys.stdin.reconfigure(encoding='utf-8')
 sys.stdout.reconfigure(encoding='utf-8')
@@ -23,6 +25,7 @@ dpg.create_context()
 ###################################################################################################
 
 create_side_window(WINDOW_TAG2, SIDE_PANEL_W, PROGRAM_H)
+create_deep_window(WINDOW_TAG3, SIDE_PANEL_W, PROGRAM_W, PROGRAM_H)
 create_main_window(WINDOW_TAG1, SIDE_PANEL_W, PROGRAM_W, PROGRAM_H)
 category = get_category()
 set_side_category(category)

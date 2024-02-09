@@ -81,23 +81,22 @@ def update_table(df): # pylint: disable=C0103
                         else:
                             dpg.add_input_text(default_value=f"{arr[i,j]}", width=2000)
 
-def data_open():
-    """
-    data_open: 
-    """
-    global INPUT_TAG1 # pylint: disable=W0602
-    url = dpg.get_value(INPUT_TAG1)
-    if validators(url):
-        webbrowser.open(url)
+# def data_open():
+#     """
+#     data_open: 
+#     """
+#     global INPUT_TAG1 # pylint: disable=W0602
+#     url = dpg.get_value(INPUT_TAG1)
+#     if validators(url):
+#         webbrowser.open(url)
 
 def data_open_all():
     """
     data_open_all: 
     """
-    global INPUT_TAG1, SELECTED_LIST # pylint: disable=W0602
-    if len(SELECTED_LIST) >= 1:
-        for url in SELECTED_LIST:
-            webbrowser.open(url)
+    global SELECTED_LIST # pylint: disable=W0602
+    for url in SELECTED_LIST:
+        webbrowser.open(url)
 
 def data_add():
     """
@@ -188,12 +187,10 @@ def create_main_window(TAG, SIDE_WIDTH, WIDTH, HEIGHT): # pylint: disable=C0103,
             height=HEIGHT, no_resize=True, no_move=True, no_close=True):
         url = pyperclip.paste()
         with dpg.group(horizontal=True):
-            dpg.add_text("URL")
+            dpg.add_button(label='OPEN', callback=data_open_all)
             dpg.add_input_text(width=700, tag=INPUT_TAG1)
             dpg.add_input_text(width=200, tag=INPUT_TAG2)
             dpg.add_button(label='PASTE', callback=data_paste)
-            dpg.add_button(label='OPEN', callback=data_open)
-            dpg.add_button(label='ALL', callback=data_open_all)
             dpg.add_button(label='ADD', callback=data_add)
             dpg.add_button(label='REMOVE', callback=data_remove)
             dpg.add_text("FILTER")
