@@ -29,7 +29,7 @@ create_deep_window(WINDOW_TAG3, SIDE_PANEL_W, PROGRAM_W, PROGRAM_H)
 create_main_window(WINDOW_TAG1, SIDE_PANEL_W, PROGRAM_W, PROGRAM_H)
 category = get_category()
 set_side_category(category)
-category_add()
+# category_add()
 
 # # custom font : Korean Hangul Font
 # with dpg.font_registry():

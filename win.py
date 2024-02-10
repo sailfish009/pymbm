@@ -11,6 +11,7 @@ import dearpygui.dearpygui as dpg
 import pandas as pd
 import pyperclip
 import requests
+from deep import data_tag
 
 WINDOW_TAG1 = "Main Window"
 TABLE_TAG1 = "Main Table"
@@ -80,15 +81,6 @@ def update_table(df): # pylint: disable=C0103
                                 user_data=[i, f"{arr[i,1]}", f"{arr[i,2]}"])
                         else:
                             dpg.add_input_text(default_value=f"{arr[i,j]}", width=2000)
-
-# def data_open():
-#     """
-#     data_open: 
-#     """
-#     global INPUT_TAG1 # pylint: disable=W0602
-#     url = dpg.get_value(INPUT_TAG1)
-#     if validators(url):
-#         webbrowser.open(url)
 
 def data_open_all():
     """
@@ -193,6 +185,7 @@ def create_main_window(TAG, SIDE_WIDTH, WIDTH, HEIGHT): # pylint: disable=C0103,
             dpg.add_button(label='PASTE', callback=data_paste)
             dpg.add_button(label='ADD', callback=data_add)
             dpg.add_button(label='REMOVE', callback=data_remove)
+            dpg.add_button(label='TAG', callback=data_tag, user_data=CATEGORY)
             dpg.add_text("FILTER")
             dpg.add_input_text(user_data=TABLE_TAG1,
                 callback=lambda s, a, u: dpg.set_value(u, dpg.get_value(s)))
