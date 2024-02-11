@@ -64,7 +64,7 @@ def update_table(df): # pylint: disable=C0103
         tag=TABLE_TAG1, label='DataFrame', header_row=False, resizable=False, scrollY=True):
         if df is not None:
             arr = df.to_numpy()
-            for i in range(DF.shape[1]-1):
+            for i in range(df.shape[1]-1):
                 if i == 0:
                     dpg.add_table_column(label=df.columns[i],
                         width_stretch=True, init_width_or_weight=0.02)
