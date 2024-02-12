@@ -29,13 +29,14 @@ create_deep_window(WINDOW_TAG3, SIDE_PANEL_W, PROGRAM_W, PROGRAM_H)
 create_main_window(WINDOW_TAG1, SIDE_PANEL_W, PROGRAM_W, PROGRAM_H)
 category = get_category()
 set_side_category(category)
-# category_add()
+category_add()
 
 # # custom font : Korean Hangul Font
 # with dpg.font_registry():
 #     # with dpg.font(".\\NotoSansKR-Medium.ttf", 16) as default_font:
 #     # with dpg.font(".\\NotoSerifCJKkr-Medium.otf", 16) as default_font:
-#     with dpg.font("C:\\Windows\\Fonts\\Malgun.ttf", 20) as default_font:
+#     # with dpg.font("C:\\Windows\\Fonts\\Malgun.ttf", 20) as default_font:
+#     with dpg.font("malgun.ttf", 20) as default_font:
 #         dpg.add_font_range_hint(dpg.mvFontRangeHint_Korean)
 #     dpg.bind_font(default_font)
 

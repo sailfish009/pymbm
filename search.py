@@ -6,5 +6,5 @@ from duckduckgo_search import DDGS
 
 def search(keyword):
     with DDGS() as ddgs:
-        results = [r for r in ddgs.text(f'{keyword}', max_results=5)]
+        results = [r for r in ddgs.text(f'{keyword}', max_results=10)]
         return results

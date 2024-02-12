@@ -98,7 +98,8 @@ def data_add():
     url = dpg.get_value(INPUT_TAG1)
     if validators(url):
         note = dpg.get_value(INPUT_TAG2)
-        CURRENT_DF = DF[DF['CATEGORY']==CATEGORY].copy()
+        if DF is not None and len(DF) > 0:
+            CURRENT_DF = DF[DF['CATEGORY']==CATEGORY].copy()
         if CURRENT_DF is None or len(CURRENT_DF) == 0:
             CURRENT_DF = None
         d = {}
