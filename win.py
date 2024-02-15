@@ -30,7 +30,7 @@ def set_category(category):
     """
     global CATEGORY, DF, CURRENT_DF, SELECTED_LIST # pylint: disable=W0602
     data_save()
-    SELECTED_LIST = []
+    SELECTED_LIST.clear()
     CATEGORY = category
     CURRENT_DF = DF[DF['CATEGORY']==category].copy()
     if CURRENT_DF is None or len(CURRENT_DF) == 0:
@@ -128,7 +128,7 @@ def data_remove():
         CURRENT_DF['ID'] = pd.to_datetime(CURRENT_DF['ID'])
         CURRENT_DF.sort_values(by='ID', ascending=True, inplace=True)
         update_table(CURRENT_DF)
-        SELECTED_LIST = []
+        SELECTED_LIST.clear()
         pyperclip.copy('')
         dpg.set_value(INPUT_TAG1, '')
         dpg.set_value(INPUT_TAG2, '')
